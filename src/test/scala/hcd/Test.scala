@@ -139,7 +139,11 @@ extends TestSuite
     HttpApp.liftF(Ok(body = bodyStream))
   }
 
-  def test(client: Client[IO], uri: Uri): IO[Unit] =
+  def testFetch(client: Client[IO], uri: Uri): IO[Unit] =
+    client.fetch(Request[IO](uri = uri))(_.body.compile.to[Array])
+      .void
+
+  def testStream(client: Client[IO], uri: Uri): IO[Unit] =
     client.stream(Request[IO](uri = uri))
       .flatMap(_.body)
       .through(StreamProgress("download")(stepSize, totalLength))
@@ -151,7 +155,7 @@ extends TestSuite
     Tests {
       "bug" - {
         println(s"$chunkLength / $chunkCount / $totalLength / $stepSize")
-        ServerTest(routes)(test)
+        ServerTest(routes)(testStream)
       }
     }
 }
