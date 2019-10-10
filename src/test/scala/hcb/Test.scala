@@ -148,7 +148,8 @@ extends TestSuite
       .flatMap(_.body)
       .through(StreamProgress("download")(stepSize, totalLength))
       .compile
-      .to[Array]
+      .to[Array] // stalls after receiving 1050MB
+      // .drain // works fine!
       .void
 
   def tests: Tests =
